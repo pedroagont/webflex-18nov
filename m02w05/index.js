@@ -32,11 +32,26 @@ const getRandomNumberPromise = () => {
   });
 };
 
-getRandomNumberPromise()
-  .then((randomNum) => randomNum * 2)
-  .then((randomNumTimes2) => {
-    if (randomNumTimes2 < 130) {
-      throw new Error(`randomNumTimes2 less than 130: ${randomNumTimes2}`);
-    }
-  })
-  .catch((err) => console.log(err));
+// ACCESING PROMISES USING THEN/CATCH
+// getRandomNumberPromise()
+// .then((randomNum) => randomNum * 2)
+// .then((randomNumTimes2) => {
+//   if (randomNumTimes2 < 130) {
+//     throw new Error(`randomNumTimes2 less than 130: ${randomNumTimes2}`);
+//   }
+// })
+// .catch((err) => console.log(err));
+
+// ACCESING PROMISES USING ASYNC/AWAIT INTRO
+const start = async () => {
+  const randomNum = await getRandomNumberPromise();
+
+  const randomNumTimes2 = (await randomNum) * 2;
+  if (randomNumTimes2 < 130) {
+    throw new Error(`randomNumTimes2 less than 130: ${randomNumTimes2}`);
+  }
+
+  console.log(randomNum, randomNumTimes2);
+};
+
+start();
