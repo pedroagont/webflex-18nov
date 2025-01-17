@@ -1,6 +1,7 @@
 // ------------------ REQUIREMENTS
 const express = require('express');
 const morgan = require('morgan');
+const cookieParser = require('cookie-parser')
 
 // Simulates a DB
 const db = {
@@ -18,6 +19,13 @@ const db = {
             content: 'Have fun!',
         },
     },
+    users: {
+        1: {
+            id: 1,
+            email: '1@1',
+            password: '123'
+        }
+    }
 };
 
 // ------------------ SETUP / MIDDLEWARE
@@ -32,6 +40,9 @@ app.set('view engine', 'ejs');
 
 // allow our server to parse/decode data through the use of a body (req.body)
 app.use(express.urlencoded({ extended: false }));
+
+// allow our server to parse data throguh the req.cookies object
+app.use(cookieParser())
 
 // ------------------ ROUTES/ENDPOINTS
 app.get('/', (req, res) => {
@@ -48,6 +59,12 @@ app.get('/test/:id', (req, res) => {
 // NOTES (LIST, NEW, SHOW)
 // NOTES LIST
 app.get('/notes', (req, res) => {
+    // validate user is logged in by checking cookie
+    const { user_id } = req.cookies
+    if(!user_id){
+        return res.status(400).send('Please login to visit this page')
+    }
+
     // populate template variables
     const templateVars = {
         notes: db.notes,
@@ -59,12 +76,24 @@ app.get('/notes', (req, res) => {
 
 // NOTES NEW
 app.get('/notes/new', (req, res) => {
+    // validate user is logged in by checking cookie
+    const { user_id } = req.cookies
+    if(!user_id){
+        return res.status(400).send('Please login to visit this page')
+    }
+
     // render template
     res.render('notes/new');
 });
 
 // NOTES SHOW
 app.get('/notes/:id', (req, res) => {
+    // validate user is logged in by checking cookie
+    const { user_id } = req.cookies
+    if(!user_id){
+        return res.status(400).send('Please login to visit this page')
+    }
+
     // Refer to the note and validate it exists
     const note = db.notes[req.params.id];
     if (!note) {
@@ -157,6 +186,35 @@ app.post('/api/notes/:id/delete', (req, res) => {
 
     res.redirect('/notes');
 });
+
+// USERS RENDERING ROUTES
+// REGISTER
+app.get('/register', (req, res) => {
+    res.render('users/register')
+})
+
+// USERS REST API ROUTES
+// REGISTER
+app.post('/api/users', (req, res) => {
+    const { email, password } = req.body
+    if(!email || !password){
+        return res.status(400).send('Email and password must be provided')
+    }
+
+    const id = Math.floor(Math.random() * 100);
+    db.users[id] = {
+        id,
+        email,
+        password
+    }
+
+    res.cookie('user_id', id)
+    res.redirect('/notes')
+})
+
+app.get('/api/users', (req, res) => {
+    res.send(db.users)
+})
 
 // Catch all route
 app.use((req, res) => {
