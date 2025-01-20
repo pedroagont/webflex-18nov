@@ -1,7 +1,9 @@
 // ------------------ REQUIREMENTS
 const express = require('express');
 const morgan = require('morgan');
-const cookieParser = require('cookie-parser')
+// const cookieParser = require('cookie-parser')
+const cookieSession = require('cookie-session')
+const bcrypt = require('bcryptjs');
 
 // Simulates a DB
 const db = {
@@ -42,7 +44,26 @@ app.set('view engine', 'ejs');
 app.use(express.urlencoded({ extended: false }));
 
 // allow our server to parse data throguh the req.cookies object
-app.use(cookieParser())
+// app.use(cookieParser())
+
+// allow our server to parse data throguh the req.session object
+app.use(cookieSession({
+    name: 'session',
+    keys: ['pikachu', 'charizard'],
+  
+    // Cookie Options
+    maxAge: 24 * 60 * 60 * 1000 // 24 hours
+  }))
+
+const validateUserIdCookie = (req, res, next) => {
+    // validate user is logged in by checking cookie
+    // const { user_id } = req.cookies
+    const { user_id } = req.session
+    if(!user_id){
+        return res.status(400).send('Please login to visit this page')
+    }
+    next()
+}
 
 // ------------------ ROUTES/ENDPOINTS
 app.get('/', (req, res) => {
@@ -58,13 +79,7 @@ app.get('/test/:id', (req, res) => {
 // NOTES RENDERING ROUTES - INTERACTIONS WITH THE USER
 // NOTES (LIST, NEW, SHOW)
 // NOTES LIST
-app.get('/notes', (req, res) => {
-    // validate user is logged in by checking cookie
-    const { user_id } = req.cookies
-    if(!user_id){
-        return res.status(400).send('Please login to visit this page')
-    }
-
+app.get('/notes', validateUserIdCookie, (req, res) => {
     // populate template variables
     const templateVars = {
         notes: db.notes,
@@ -75,25 +90,13 @@ app.get('/notes', (req, res) => {
 });
 
 // NOTES NEW
-app.get('/notes/new', (req, res) => {
-    // validate user is logged in by checking cookie
-    const { user_id } = req.cookies
-    if(!user_id){
-        return res.status(400).send('Please login to visit this page')
-    }
-
+app.get('/notes/new', validateUserIdCookie, (req, res) => {
     // render template
     res.render('notes/new');
 });
 
 // NOTES SHOW
-app.get('/notes/:id', (req, res) => {
-    // validate user is logged in by checking cookie
-    const { user_id } = req.cookies
-    if(!user_id){
-        return res.status(400).send('Please login to visit this page')
-    }
-
+app.get('/notes/:id', validateUserIdCookie, (req, res) => {
     // Refer to the note and validate it exists
     const note = db.notes[req.params.id];
     if (!note) {
@@ -107,7 +110,7 @@ app.get('/notes/:id', (req, res) => {
 
 // REST API CRUD NOTES - NOT INTERACTING WITH THE USER, JUST DATA HANDLERS
 // CREATE NOTE API - POST
-app.post('/api/notes', (req, res) => {
+app.post('/api/notes', validateUserIdCookie, (req, res) => {
     // body properties validation
     const { content } = req.body;
     if (!content) {
@@ -147,7 +150,7 @@ app.get('/api/notes/:id', (req, res) => {
 });
 
 // UPDATE NOTE API - POST/PUT/PATCH
-app.post('/api/notes/:id/edit', (req, res) => {
+app.post('/api/notes/:id/edit', validateUserIdCookie, (req, res) => {
     // body properties validation
     const { content } = req.body;
     if (!content) {
@@ -171,7 +174,7 @@ app.post('/api/notes/:id/edit', (req, res) => {
 });
 
 // DELETE NOTE API - POST/DELETE
-app.post('/api/notes/:id/delete', (req, res) => {
+app.post('/api/notes/:id/delete', validateUserIdCookie, (req, res) => {
     // Refer to the note and validate it exists
     const note = db.notes[req.params.id];
     if (!note) {
@@ -193,6 +196,11 @@ app.get('/register', (req, res) => {
     res.render('users/register')
 })
 
+// LOGIN
+app.get('/login', (req, res) => {
+    res.render('users/login')
+})
+
 // USERS REST API ROUTES
 // REGISTER
 app.post('/api/users', (req, res) => {
@@ -202,18 +210,54 @@ app.post('/api/users', (req, res) => {
     }
 
     const id = Math.floor(Math.random() * 100);
+    const hashedPassword = bcrypt.hashSync(password, 8);
     db.users[id] = {
         id,
         email,
-        password
+        password: hashedPassword
     }
 
-    res.cookie('user_id', id)
+    // res.cookie('user_id', id)
+    req.session.user_id = id
+    res.redirect('/notes')
+})
+
+// LOGIN
+app.post('/api/users/login', (req, res) => {
+    const { email, password } = req.body
+    if(!email || !password){
+        return res.status(400).send('Email and password must be provided')
+    }
+
+    let user = null
+    for (id in db.users) {
+        if(db.users[id].email === email) {
+            user = db.users[id]
+        }
+    }
+    if(!user){
+        return res.status(400).send('Invalid credentials')
+    }
+
+    // const passwordsMatch = user.password === password
+    const passwordsMatch = bcrypt.compareSync(password, user.password);
+    if(!passwordsMatch) {
+        return res.status(400).send('Invalid credentials')
+    }
+
+    // res.cookie('user_id', id)
+    req.session.user_id = id
     res.redirect('/notes')
 })
 
 app.get('/api/users', (req, res) => {
     res.send(db.users)
+})
+
+app.post('/api/users/logout', (req, res) => {
+    // res.clearCookie('user_id')
+    req.session = null;
+    res.redirect('/login')
 })
 
 // Catch all route
