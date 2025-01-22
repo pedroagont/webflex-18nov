@@ -1,0 +1,70 @@
+body {
+    background-color: grey;
+    color: white;
+    font-family: sans-serif;
+}
+
+.navbar {
+    /* Box model */
+    width: 100%;
+    padding: 10px;
+    background-color: black;
+
+    /* Flex */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    position: fixed;
+    top: 0;
+    left: 0;
+}
+
+.navbar-logo {
+    font-size: 30px;
+}
+
+.navbar-menu {
+    /* Box model */
+    list-style: none;
+    width: 50%;
+
+    /* Flex */
+    display: flex;
+    justify-content: space-around;
+}
+
+header.header {
+    /* Box model */
+    width: 100%;
+    height: 200px;
+    padding: 10px;
+    padding-top: 100px;
+    background-image: url(https://www.telemundo.com/sites/nbcutelemundo/files/styles/fit-560w/public/images/promo/article/2017/11/07/extraterrestre-con-cielo-nocturno-detras.jpg);
+    background-color: black;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+
+    /* Flex */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+h1.header-title, h1.header-desc {
+    text-shadow: 1px 1px 1px black;
+}
+
+button.header-cta  {
+    width: 150px;
+    padding: 10px;
+}
+
+
+
+
+
+
+
+
