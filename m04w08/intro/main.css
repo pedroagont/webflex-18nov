@@ -1,0 +1,31 @@
+/*
+selector {
+    property1: value;
+    property2: value;
+}
+*/
+
+.title {
+  color: red;
+}
+
+.subtitle-1,
+.subtitle-2 {
+  text-shadow: 1px 1px 1px black;
+}
+
+.subtitle-1 {
+  color: purple;
+}
+
+.subtitle-2 {
+  color: green;
+}
+
+p {
+  text-decoration: line-through;
+}
+
+.image {
+  width: 100px;
+}
