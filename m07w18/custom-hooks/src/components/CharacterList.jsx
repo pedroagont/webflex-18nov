@@ -1,11 +1,13 @@
-function CharacterList() {
+function CharacterList({ charactersData, loading }) {
   return (
     <section>
       <h3>My favorite start wars characters</h3>
       <ul>
-        <li>Anakin Skywalker</li>
-        <li>Darth Vader</li>
-        <li>R2D2</li>
+        {loading && <p>Loading...</p>}
+
+        {!loading && charactersData.map((char) => (
+          <li key={char.name}>{char.name}</li>
+        ))}
       </ul>
     </section>
   );

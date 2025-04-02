@@ -1,8 +1,11 @@
-function Header() {
+function Header({ title, description, count, charactersLength }) {
   return (
     <header>
-      <h1>Hello from app! 👽</h1>
-      <p>Wow this lecture is amazing!</p>
+      <h1>{title}</h1>
+      <p>{description}</p>
+      <p>Counter goes in: {count}</p>
+      <p>Characters found: {charactersLength}</p>
+
     </header>
   );
 }

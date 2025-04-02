@@ -1,9 +1,10 @@
-function Counter() {
+function Counter({ count, handleClickDecrement, handleClickIncrement }) {
+
   return (
     <section>
-      <h3>My counter: 0</h3>
-      <button>Decrement</button>
-      <button>Increment</button>
+      <h3>My counter: { count }</h3>
+      <button onClick={handleClickDecrement}>Decrement</button>
+      <button onClick={handleClickIncrement}>Increment</button>
     </section>
   );
 }
