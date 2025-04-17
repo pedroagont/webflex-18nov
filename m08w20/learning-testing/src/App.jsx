@@ -1,35 +1,64 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useState } from "react";
+import "./App.css";
+
+import sortProductsByPrice from './helpers/sortProductsByPrice'
+
+const initialProducts = [
+  {
+    id: 1,
+    name: "iPad",
+    price: 400,
+  },
+  {
+    id: 2,
+    name: "iPhone",
+    price: 600,
+  },
+  {
+    id: 3,
+    name: "Apple Mouse",
+    price: 100,
+  },
+  {
+    id: 4,
+    name: "Apple Watch",
+    price: 200,
+  },
+];
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [products, setProducts] = useState(initialProducts)
+
+  const handleClickSortByPrice = () => {
+    console.log('Hello from button!')
+
+    setProducts(prev => sortProductsByPrice(prev))
+  }
+
 
   return (
     <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
+      <header>
+        <h1>Hello from app! 👽</h1>
+        <p>This lecture is awesome!</p>
+      </header>
+      <section>
+        <h3>My amazing store!</h3>
+        <button onClick={handleClickSortByPrice}>Sort by price</button>
+        <ul>
+          {products.map((product) => (
+            <li key={product.id}>
+              <article>
+                <h5>{product.name}</h5>
+                <p>{product.price}</p>
+                <button>Buy!</button>
+              </article>
+            </li>
+          ))}
+        </ul>
+      </section>
     </>
-  )
+  );
 }
 
-export default App
+export default App;
